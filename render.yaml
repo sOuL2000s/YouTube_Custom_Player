@@ -12,4 +12,3 @@ services:
     runtime: static
     rootDir: frontend
     staticPublishPath: .
-    plan: free
