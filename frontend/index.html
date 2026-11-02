@@ -1536,7 +1536,8 @@
                 const currentId = currentVideo ? currentVideo.id : '';
 
                 try {
-                    const response = await fetch(`${BACKEND_URL}/api/related?title=${encodeURIComponent(currentTitle)}&id=${encodeURIComponent(currentId)}`);
+                    const currentUploader = currentVideo ? (currentVideo.uploader || currentVideo.author || '') : '';
+const response = await fetch(`${BACKEND_URL}/api/related?title=${encodeURIComponent(currentTitle)}&id=${encodeURIComponent(currentId)}&uploader=${encodeURIComponent(currentUploader)}`);
                     const recs = await response.json();
                     if (recs && recs.length > 0) {
                         const rec = recs[Math.floor(Math.random() * recs.length)];

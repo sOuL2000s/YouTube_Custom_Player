@@ -8,6 +8,21 @@ import yt_dlp
 PORT = int(os.environ.get("PORT", 8000))
 DIRECTORY = os.path.dirname(os.path.abspath(__file__))
 
+# Keywords that indicate a "same-song variant" rather than a genuinely different song.
+VERSION_KEYWORDS = [
+    'remix', 'cover', 'karaoke', 'instrumental', 'slowed', 'reverb',
+    '8d', 'nightcore', 'extended', 'edit', 'live', 'acoustic version',
+    'sped up', 'speed up', 'lofi version', 'reprise', 'mashup',
+]
+
+
+def is_version_like(title):
+    """Return True if the title looks like a variant of an existing song."""
+    if not title:
+        return False
+    t = title.lower()
+    return any(kw in t for kw in VERSION_KEYWORDS)
+
 
 class CustomHandler(http.server.SimpleHTTPRequestHandler):
     def __init__(self, *args, **kwargs):
@@ -25,7 +40,6 @@ class CustomHandler(http.server.SimpleHTTPRequestHandler):
         elif path == '/api/related':
             self.handle_related(query_params)
         elif path == '/':
-            # Backend no longer serves the frontend; just confirm it's alive.
             self.send_json_response({
                 'status': 'ok',
                 'service': 'youtube-custom-player-backend',
@@ -35,7 +49,6 @@ class CustomHandler(http.server.SimpleHTTPRequestHandler):
             self.send_json_response({'error': 'not found'}, status=404)
 
     def do_OPTIONS(self):
-        # CORS preflight support
         self.send_response(204)
         self.send_header('Access-Control-Allow-Origin', '*')
         self.send_header('Access-Control-Allow-Methods', 'GET, OPTIONS')
@@ -88,32 +101,113 @@ class CustomHandler(http.server.SimpleHTTPRequestHandler):
     def handle_related(self, params):
         title = params.get('title', [''])[0]
         video_id = params.get('id', [''])[0]
+        uploader = params.get('uploader', [''])[0]
 
-        search_query = f"{title} related songs" if title else "top hindi drive songs"
+        # ---- Attempt 1: YouTube Mix radio playlist (uses YT's own recs) ----
+        if video_id:
+            results = self._try_radio_mix(video_id)
+            if results:
+                self.send_json_response(results)
+                return
+
+        # ---- Attempt 2: Filtered search fallback ----
+        if uploader:
+            search_query = f"{uploader} similar songs -cover -remix -karaoke -slowed"
+        elif title:
+            search_query = f"{title} mix -cover -remix -karaoke -slowed -instrumental"
+        else:
+            search_query = "top hindi drive songs"
 
         ydl_opts = {
             'quiet': True,
             'extract_flat': True,
-            'default_search': 'ytsearch6',
+            'default_search': 'ytsearch15',
             'no_warnings': True
         }
 
         try:
             with yt_dlp.YoutubeDL(ydl_opts) as ydl:
-                res = ydl.extract_info(f"ytsearch6:{search_query}", download=False)
+                res = ydl.extract_info(f"ytsearch15:{search_query}", download=False)
                 results = []
                 for entry in res.get('entries', []):
-                    if entry and entry.get('id') != video_id:
-                        v_id = entry.get('id')
-                        results.append({
-                            'id': v_id,
-                            'title': entry.get('title'),
-                            'uploader': entry.get('uploader') or entry.get('channel') or 'YouTube',
-                            'thumbnail': f"https://i.ytimg.com/vi/{v_id}/hqdefault.jpg"
-                        })
+                    if not entry:
+                        continue
+                    v_id = entry.get('id')
+                    if not v_id or v_id == video_id:
+                        continue
+                    entry_title = entry.get('title') or ''
+                    if is_version_like(entry_title):
+                        continue
+                    results.append({
+                        'id': v_id,
+                        'title': entry_title,
+                        'uploader': entry.get('uploader') or entry.get('channel') or 'YouTube',
+                        'thumbnail': f"https://i.ytimg.com/vi/{v_id}/hqdefault.jpg"
+                    })
+                    if len(results) >= 8:
+                        break
+
+                # If filtering removed everything, fall back to unfiltered results
+                if not results:
+                    for entry in res.get('entries', []):
+                        if entry and entry.get('id') and entry.get('id') != video_id:
+                            v_id = entry['id']
+                            results.append({
+                                'id': v_id,
+                                'title': entry.get('title'),
+                                'uploader': entry.get('uploader') or entry.get('channel') or 'YouTube',
+                                'thumbnail': f"https://i.ytimg.com/vi/{v_id}/hqdefault.jpg"
+                            })
+                            if len(results) >= 6:
+                                break
+
                 self.send_json_response(results)
         except Exception as e:
+            print(f"Related error: {e}")
             self.send_json_response({'error': str(e)}, status=500)
+
+    def _try_radio_mix(self, video_id):
+        """Fetch YouTube's own radio/mix playlist for the given video."""
+        ydl_opts = {
+            'quiet': True,
+            'extract_flat': True,
+            'no_warnings': True,
+            'playlistend': 12,
+        }
+        try:
+            with yt_dlp.YoutubeDL(ydl_opts) as ydl:
+                radio_url = f"https://www.youtube.com/playlist?list=RDAMVM{video_id}"
+                res = ydl.extract_info(radio_url, download=False)
+                entries = res.get('entries') or []
+
+                # Need at least a few real entries; the first entry is usually
+                # the seed video itself, so skip it.
+                if len(entries) < 3:
+                    return []
+
+                results = []
+                for entry in entries:
+                    if not entry:
+                        continue
+                    v_id = entry.get('id')
+                    if not v_id or v_id == video_id:
+                        continue
+                    entry_title = entry.get('title') or ''
+                    if is_version_like(entry_title):
+                        continue
+                    results.append({
+                        'id': v_id,
+                        'title': entry_title,
+                        'uploader': entry.get('uploader') or entry.get('channel') or 'YouTube',
+                        'thumbnail': f"https://i.ytimg.com/vi/{v_id}/hqdefault.jpg"
+                    })
+                    if len(results) >= 8:
+                        break
+
+                return results
+        except Exception as e:
+            print(f"Radio mix failed for {video_id}: {e}")
+            return []
 
     def send_json_response(self, data, status=200):
         self.send_response(status)
@@ -123,7 +217,6 @@ class CustomHandler(http.server.SimpleHTTPRequestHandler):
         self.wfile.write(json.dumps(data).encode('utf-8'))
 
     def log_message(self, format, *args):
-        # Keep Render logs clean; remove if you want verbose access logs.
         pass
 
 
