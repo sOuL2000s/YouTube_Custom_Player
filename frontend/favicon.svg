@@ -17,30 +17,19 @@
     </filter>
   </defs>
 
-  <!-- Base canvas with rounded corners -->
   <rect width="512" height="512" rx="120" fill="url(#bgGrad)"/>
   <rect x="12" y="12" width="488" height="488" rx="108" fill="none" stroke="url(#pinkGrad)" stroke-width="8" stroke-opacity="0.3"/>
-
-  <!-- Main Glowing Red/Pink Circle Badge -->
   <circle cx="256" cy="256" r="185" fill="url(#pinkGrad)" filter="url(#shadow)"/>
 
-  <!-- Central Music Note & Play Hybrid Graphic -->
   <g fill="url(#playGrad)">
-    <!-- Play Triangle -->
     <path d="M 195 152 C 182 144 165 153 165 169 L 165 343 C 165 359 182 368 195 360 L 336 273 C 348 265 348 247 336 239 Z"/>
   </g>
 
-  <!-- Beamed Music Note overlay on top right of the badge -->
   <g fill="#ffffff">
-    <!-- Beam -->
     <path d="M 320 135 L 395 115 C 400 113 405 117 405 123 L 405 140 L 320 162 Z"/>
-    <!-- Left Stem -->
     <rect x="320" y="140" width="12" height="95" rx="6"/>
-    <!-- Left Head -->
     <ellipse cx="304" cy="230" rx="22" ry="16" transform="rotate(-20 304 230)"/>
-    <!-- Right Stem -->
     <rect x="393" y="120" width="12" height="90" rx="6"/>
-    <!-- Right Head -->
     <ellipse cx="377" cy="205" rx="22" ry="16" transform="rotate(-20 377 205)"/>
   </g>
 </svg>

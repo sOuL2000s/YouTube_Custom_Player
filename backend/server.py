@@ -8,6 +8,7 @@ import yt_dlp
 PORT = int(os.environ.get("PORT", 8000))
 DIRECTORY = os.path.dirname(os.path.abspath(__file__))
 
+
 class CustomHandler(http.server.SimpleHTTPRequestHandler):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, directory=DIRECTORY, **kwargs)
@@ -23,8 +24,23 @@ class CustomHandler(http.server.SimpleHTTPRequestHandler):
             self.handle_search(query_params)
         elif path == '/api/related':
             self.handle_related(query_params)
+        elif path == '/':
+            # Backend no longer serves the frontend; just confirm it's alive.
+            self.send_json_response({
+                'status': 'ok',
+                'service': 'youtube-custom-player-backend',
+                'endpoints': ['/api/ping', '/api/search?q=...', '/api/related?title=...&id=...']
+            })
         else:
-            super().do_GET()
+            self.send_json_response({'error': 'not found'}, status=404)
+
+    def do_OPTIONS(self):
+        # CORS preflight support
+        self.send_response(204)
+        self.send_header('Access-Control-Allow-Origin', '*')
+        self.send_header('Access-Control-Allow-Methods', 'GET, OPTIONS')
+        self.send_header('Access-Control-Allow-Headers', 'Content-Type')
+        self.end_headers()
 
     def handle_search(self, params):
         q = params.get('q', [''])[0]
@@ -41,19 +57,18 @@ class CustomHandler(http.server.SimpleHTTPRequestHandler):
 
         try:
             with yt_dlp.YoutubeDL(ydl_opts) as ydl:
-                # If it's a URL, use it directly, otherwise use ytsearch
                 search_query = q if q.startswith(('http://', 'https://')) else f"ytsearch10:{q}"
                 res = ydl.extract_info(search_query, download=False)
-                
+
                 results = []
-                # Handle both single video and search results
                 entries = res.get('entries', [res]) if 'entries' in res or 'id' in res else []
-                
+
                 for entry in entries:
                     if entry:
                         video_id = entry.get('id')
-                        if not video_id: continue
-                        
+                        if not video_id:
+                            continue
+
                         title = entry.get('title') or 'Unknown Title'
                         uploader = entry.get('uploader') or entry.get('channel') or 'YouTube'
                         duration = entry.get('duration')
@@ -68,13 +83,12 @@ class CustomHandler(http.server.SimpleHTTPRequestHandler):
                 self.send_json_response(results)
         except Exception as e:
             print(f"Search error: {e}")
-            self.send_json_response([], status=200) # Return empty list on error to avoid frontend crash
+            self.send_json_response([], status=200)
 
     def handle_related(self, params):
         title = params.get('title', [''])[0]
         video_id = params.get('id', [''])[0]
-        
-        # Search for related music tracks using song title + recommendations
+
         search_query = f"{title} related songs" if title else "top hindi drive songs"
 
         ydl_opts = {
@@ -108,11 +122,16 @@ class CustomHandler(http.server.SimpleHTTPRequestHandler):
         self.end_headers()
         self.wfile.write(json.dumps(data).encode('utf-8'))
 
+    def log_message(self, format, *args):
+        # Keep Render logs clean; remove if you want verbose access logs.
+        pass
+
+
 if __name__ == '__main__':
     os.chdir(DIRECTORY)
     socketserver.TCPServer.allow_reuse_address = True
     with socketserver.TCPServer(("", PORT), CustomHandler) as httpd:
-        print(f"Server running at http://localhost:{PORT}")
+        print(f"Backend API running at http://localhost:{PORT}")
         try:
             httpd.serve_forever()
         except KeyboardInterrupt:

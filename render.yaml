@@ -1,0 +1,15 @@
+services:
+  - type: web
+    name: youtube-player-backend
+    runtime: python
+    rootDir: backend
+    buildCommand: pip install -r requirements.txt
+    startCommand: python server.py
+    plan: free
+
+  - type: web
+    name: youtube-custom-player
+    runtime: static
+    rootDir: frontend
+    staticPublishPath: .
+    plan: free

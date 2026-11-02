@@ -4,9 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>🎵 Custom YouTube Music Player & Queue</title>
-    <!-- Favicon -->
     <link rel="icon" type="image/svg+xml" href="favicon.svg">
-    <!-- FontAwesome icons for player buttons -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
         :root {
@@ -33,10 +31,9 @@
             display: flex;
             flex-direction: column;
             overflow-x: hidden;
-            padding-bottom: 95px; /* Prevent fixed bottom player bar from overlapping content */
+            padding-bottom: 95px;
         }
 
-        /* Top Header & Search */
         header {
             background: var(--card-bg);
             padding: 12px 25px;
@@ -139,7 +136,6 @@
             transform: scale(1.05);
         }
 
-        /* Quick Search Chips */
         .search-chips {
             display: flex;
             gap: 8px;
@@ -170,7 +166,6 @@
             border-color: var(--accent-color);
         }
 
-        /* Mobile Quick Section Tabs */
         .mobile-nav-tabs {
             display: none;
             background: #141724;
@@ -205,7 +200,6 @@
             border-color: var(--accent-color);
         }
 
-        /* Main Dashboard Layout */
         .main-container {
             display: grid;
             grid-template-columns: 1fr 380px;
@@ -222,7 +216,6 @@
             scroll-behavior: smooth;
         }
 
-        /* YouTube Video Display & Container */
         .player-viewport {
             background: #000;
             border-radius: 14px;
@@ -242,7 +235,6 @@
             border: none;
         }
 
-        /* Search Results Section */
         #resultsSection {
             scroll-margin-top: 130px;
             display: flex;
@@ -400,7 +392,6 @@
             color: white;
         }
 
-        /* Right Panel: Queue & Recommendations */
         .right-panel {
             background: var(--card-bg);
             border-left: 1px solid var(--border-color);
@@ -499,7 +490,6 @@
             text-overflow: ellipsis;
         }
 
-        /* Bottom Fixed Player Controls Bar */
         footer.player-bar {
             position: fixed;
             bottom: 0;
@@ -667,7 +657,6 @@
             background: white;
         }
 
-        /* Notification Toast */
         .toast {
             position: fixed;
             top: 20px;
@@ -690,17 +679,14 @@
             to { opacity: 1; transform: translateY(0); }
         }
 
-        /* Responsive Breakpoints */
         @media (max-width: 900px) {
             .main-container {
                 grid-template-columns: 1fr;
                 height: auto;
             }
-
             .mobile-nav-tabs {
                 display: flex;
             }
-
             .right-panel {
                 border-left: none;
                 border-top: 1px solid var(--border-color);
@@ -712,62 +698,49 @@
             header {
                 padding: 10px 15px;
             }
-
             .logo {
                 font-size: 1.1rem;
             }
-
             .search-box input {
                 font-size: 0.88rem;
                 padding: 8px 75px 8px 36px;
             }
-
             .search-box i.search-icon {
                 left: 12px;
             }
-
             .clear-btn {
                 right: 38px;
             }
-
             .search-submit-btn {
                 width: 28px;
                 height: 28px;
             }
-
             .left-panel {
                 padding: 12px 12px;
                 gap: 18px;
             }
-
             .right-panel {
                 padding: 12px 12px;
             }
-
             .player-viewport {
                 max-height: 230px;
                 border-radius: 10px;
             }
-
             .results-grid {
                 grid-template-columns: repeat(2, 1fr);
                 gap: 10px;
             }
-
             .song-card {
                 padding: 8px;
                 border-radius: 10px;
             }
-
             .song-title-text {
                 font-size: 0.82rem;
             }
-
             .song-uploader {
                 font-size: 0.72rem;
                 margin-bottom: 8px;
             }
-
             .btn {
                 padding: 6px 4px;
                 font-size: 0.75rem;
@@ -780,41 +753,33 @@
                 padding: 0 10px;
                 gap: 8px;
             }
-
             .track-details {
                 width: 140px;
                 gap: 8px;
             }
-
             .now-playing-thumb {
                 width: 40px;
                 height: 40px;
             }
-
             .now-playing-title {
                 font-size: 0.8rem;
             }
-
             .buttons-row {
                 gap: 12px;
             }
-
             .ctrl-btn {
                 font-size: 0.95rem;
             }
-
             .play-pause-btn {
                 width: 36px;
                 height: 36px;
                 font-size: 1rem;
             }
-
             .volume-container {
                 width: auto;
             }
-
             .volume-slider {
-                display: none; /* Hide volume slider on mobile, keep mute icon */
+                display: none;
             }
         }
 
@@ -824,27 +789,21 @@
                 align-items: stretch;
                 gap: 10px;
             }
-
             .logo {
                 justify-content: center;
             }
-
             .track-details {
                 width: 110px;
             }
-
             .now-playing-thumb {
-                display: none; /* Hide thumb on extra small screens to save space */
+                display: none;
             }
-
             #shuffleBtn, #loopBtn {
                 display: none;
             }
-
             .progress-row span {
                 font-size: 0.7rem;
             }
-
             .results-grid {
                 grid-template-columns: repeat(2, 1fr);
             }
@@ -856,7 +815,6 @@
             }
         }
 
-        /* Render Backend Wake-up Interactive Screen */
         .wakeup-overlay {
             position: fixed;
             top: 0;
@@ -1087,10 +1045,8 @@
 </head>
 <body>
 
-    <!-- Notification Toast -->
     <div id="toast" class="toast">Auto-playing recommended YouTube track!</div>
 
-    <!-- Render Server Wake-Up Interactive Overlay -->
     <div id="wakeupOverlay" class="wakeup-overlay">
         <div class="wakeup-card">
             <div class="wakeup-header">
@@ -1167,7 +1123,7 @@
         </div>
     </header>
 
-    <!-- Mobile Navigation Tabs (visible on mobile/tablet) -->
+    <!-- Mobile Navigation Tabs -->
     <div class="mobile-nav-tabs">
         <button class="mobile-tab active" onclick="scrollToSection('playerViewport', this)"><i class="fa-solid fa-circle-play"></i> Player</button>
         <button class="mobile-tab" onclick="scrollToSection('resultsSection', this)"><i class="fa-solid fa-magnifying-glass"></i> Results</button>
@@ -1176,16 +1132,14 @@
 
     <!-- Main Content -->
     <div class="main-container">
-        
+
         <!-- Left Panel: Video & Search Results -->
         <div class="left-panel">
-            
-            <!-- YouTube Viewport -->
+
             <div class="player-viewport" id="playerViewport">
                 <div id="player-container"></div>
             </div>
 
-            <!-- Search Results Section -->
             <div id="resultsSection">
                 <div class="section-header">
                     <div class="section-title">
@@ -1219,8 +1173,7 @@
 
     <!-- Fixed Player Controls Bar -->
     <footer class="player-bar">
-        
-        <!-- Currently Playing Song Details -->
+
         <div class="track-details">
             <img id="npThumb" class="now-playing-thumb" src="https://via.placeholder.com/55?text=Music" alt="Cover">
             <div class="now-playing-text">
@@ -1229,7 +1182,6 @@
             </div>
         </div>
 
-        <!-- Center Controls -->
         <div class="player-controls">
             <div class="buttons-row">
                 <button class="ctrl-btn" id="shuffleBtn" title="Toggle Shuffle" onclick="toggleShuffle()"><i class="fa-solid fa-shuffle"></i></button>
@@ -1239,7 +1191,7 @@
                 <button class="ctrl-btn" title="Next" onclick="playNext()"><i class="fa-solid fa-forward-step"></i></button>
                 <button class="ctrl-btn active" id="autoplayBtn" title="Auto-Play Enabled" onclick="toggleAutoplay()"><i class="fa-solid fa-robot"></i></button>
             </div>
-            
+
             <div class="progress-row">
                 <span id="currentTime">0:00</span>
                 <input type="range" id="seekSlider" class="seek-slider" value="0" min="0" max="100" onchange="seekTo(this.value)">
@@ -1247,7 +1199,6 @@
             </div>
         </div>
 
-        <!-- Volume & Actions -->
         <div class="volume-container">
             <i class="fa-solid fa-volume-high" id="volumeIcon" onclick="toggleMute()" style="cursor: pointer;" title="Mute/Unmute"></i>
             <input type="range" id="volumeSlider" class="volume-slider" value="100" min="0" max="100" oninput="setVolume(this.value)" title="Volume">
@@ -1256,6 +1207,12 @@
     </footer>
 
     <script>
+        // ════════════════════════════════════════════════════════════
+        //  BACKEND CONFIG — replace this with your Render Web Service URL
+        // ════════════════════════════════════════════════════════════
+        const BACKEND_URL = 'https://youtube-player-backend.onrender.com';
+        // ════════════════════════════════════════════════════════════
+
         let ytPlayer;
         let isPlayerReady = false;
         let currentVideo = null;
@@ -1266,12 +1223,11 @@
         let isLoopEnabled = false;
         let isMuted = false;
 
-        // Initialize YouTube Iframe Player
         function onYouTubeIframeAPIReady() {
             ytPlayer = new YT.Player('player-container', {
                 height: '100%',
                 width: '100%',
-                videoId: '0k2xQjM1dIQ', // Default initial video
+                videoId: '0k2xQjM1dIQ',
                 playerVars: {
                     'autoplay': 1,
                     'controls': 1,
@@ -1288,8 +1244,6 @@
         function onPlayerReady(event) {
             isPlayerReady = true;
             startProgressLoop();
-            
-            // Check backend health & wake up if Render container is sleeping
             initBackendHealthCheck();
         }
 
@@ -1305,7 +1259,6 @@
             }
         }
 
-        // Handle Search Inputs
         function checkInputState(e) {
             const val = document.getElementById('searchInput').value;
             document.getElementById('clearBtn').style.display = val.length > 0 ? 'inline-block' : 'none';
@@ -1337,17 +1290,16 @@
             searchYouTube(query, true);
         }
 
-        // Search YouTube Function
         async function searchYouTube(query, autoScroll = true) {
             if (!query) return;
 
             const heading = document.getElementById('resultsHeading');
             const badge = document.getElementById('resultsBadge');
             const grid = document.getElementById('resultsGrid');
-            
+
             heading.innerHTML = `<i class="fa-solid fa-spinner fa-spin" style="color: var(--accent-color)"></i> Searching for "${escapeHtml(query)}"...`;
             badge.innerText = 'Searching';
-            
+
             grid.innerHTML = `
                 <div class="loading-state">
                     <i class="fa-solid fa-circle-notch fa-spin"></i>
@@ -1358,12 +1310,12 @@
             if (autoScroll) {
                 scrollToSection('resultsSection');
             }
-            
+
             const controller = new AbortController();
-            const timeoutId = setTimeout(() => controller.abort(), 10000); // 10s timeout
+            const timeoutId = setTimeout(() => controller.abort(), 10000);
 
             try {
-                const response = await fetch(`/api/search?q=${encodeURIComponent(query)}`, { signal: controller.signal });
+                const response = await fetch(`${BACKEND_URL}/api/search?q=${encodeURIComponent(query)}`, { signal: controller.signal });
                 clearTimeout(timeoutId);
                 const results = await response.json();
                 isBackendLive = true;
@@ -1373,8 +1325,7 @@
             } catch (err) {
                 clearTimeout(timeoutId);
                 console.error("Search error:", err);
-                
-                // If backend is sleeping/waking up, show the interactive wake-up screen
+
                 if (!isBackendLive) {
                     showWakeupOverlay(query);
                 } else {
@@ -1395,7 +1346,7 @@
             results.forEach(item => {
                 const card = document.createElement('div');
                 card.className = 'song-card';
-                
+
                 const thumbWrapper = document.createElement('div');
                 thumbWrapper.className = 'song-thumb-wrapper';
 
@@ -1404,18 +1355,18 @@
                 thumb.src = item.thumbnail;
                 thumb.alt = 'thumb';
                 thumbWrapper.appendChild(thumb);
-                
+
                 const title = document.createElement('div');
                 title.className = 'song-title-text';
                 title.textContent = item.title;
-                
+
                 const uploader = document.createElement('div');
                 uploader.className = 'song-uploader';
                 uploader.textContent = item.uploader;
-                
+
                 const actions = document.createElement('div');
                 actions.className = 'card-actions';
-                
+
                 const playBtn = document.createElement('button');
                 playBtn.className = 'btn btn-primary';
                 playBtn.innerHTML = '<i class="fa-solid fa-play"></i> Play';
@@ -1423,20 +1374,20 @@
                     playNow(item.id, item.title, item.uploader, item.thumbnail);
                     showToast(`Playing "${item.title.substring(0, 25)}..."`);
                 };
-                
+
                 const queueBtn = document.createElement('button');
                 queueBtn.className = 'btn btn-secondary';
                 queueBtn.innerHTML = '<i class="fa-solid fa-plus"></i> Queue';
                 queueBtn.onclick = () => addToQueue(item.id, item.title, item.uploader, item.thumbnail);
-                
+
                 actions.appendChild(playBtn);
                 actions.appendChild(queueBtn);
-                
+
                 card.appendChild(thumbWrapper);
                 card.appendChild(title);
                 card.appendChild(uploader);
                 card.appendChild(actions);
-                
+
                 grid.appendChild(card);
             });
         }
@@ -1445,7 +1396,6 @@
             return str ? str.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;').replace(/'/g, '&#039;') : '';
         }
 
-        // Section Scroll helper for Mobile & Desktop
         function scrollToSection(sectionId, btnElem = null) {
             const elem = document.getElementById(sectionId);
             if (elem) {
@@ -1457,11 +1407,10 @@
             }
         }
 
-        // Playback Management
         function playNow(id, title, uploader, thumbnail) {
             currentVideo = { id, title, uploader, thumbnail };
             history.push(currentVideo);
-            
+
             if (isPlayerReady && ytPlayer) {
                 ytPlayer.loadVideoById(id);
             }
@@ -1488,7 +1437,6 @@
             }
         }
 
-        // Queue Management
         function addToQueue(id, title, uploader, thumbnail) {
             queue.push({ id, title, uploader, thumbnail });
             renderQueue();
@@ -1507,26 +1455,26 @@
             queue.forEach((item, index) => {
                 const div = document.createElement('div');
                 div.className = 'queue-item';
-                
+
                 const thumb = document.createElement('img');
                 thumb.className = 'queue-thumb';
                 thumb.src = item.thumbnail;
                 thumb.alt = 'thumb';
-                
+
                 const info = document.createElement('div');
                 info.className = 'queue-info';
-                
+
                 const title = document.createElement('div');
                 title.className = 'queue-title';
                 title.textContent = item.title;
-                
+
                 const artist = document.createElement('div');
                 artist.className = 'queue-artist';
                 artist.textContent = item.uploader;
-                
+
                 info.appendChild(title);
                 info.appendChild(artist);
-                
+
                 const removeBtn = document.createElement('button');
                 removeBtn.className = 'icon-btn';
                 removeBtn.innerHTML = '<i class="fa-solid fa-xmark"></i>';
@@ -1535,11 +1483,11 @@
                     e.stopPropagation();
                     removeFromQueue(index);
                 };
-                
+
                 div.appendChild(thumb);
                 div.appendChild(info);
                 div.appendChild(removeBtn);
-                
+
                 div.onclick = () => playFromQueue(index);
                 list.appendChild(div);
             });
@@ -1570,7 +1518,6 @@
             showToast("Queue shuffled!");
         }
 
-        // Next & YouTube Recommendation Algorithm Fallback
         async function playNext() {
             if (isLoopEnabled && currentVideo) {
                 playNow(currentVideo.id, currentVideo.title, currentVideo.uploader || currentVideo.author, currentVideo.thumbnail);
@@ -1589,7 +1536,7 @@
                 const currentId = currentVideo ? currentVideo.id : '';
 
                 try {
-                    const response = await fetch(`/api/related?title=${encodeURIComponent(currentTitle)}&id=${encodeURIComponent(currentId)}`);
+                    const response = await fetch(`${BACKEND_URL}/api/related?title=${encodeURIComponent(currentTitle)}&id=${encodeURIComponent(currentId)}`);
                     const recs = await response.json();
                     if (recs && recs.length > 0) {
                         const rec = recs[Math.floor(Math.random() * recs.length)];
@@ -1609,7 +1556,6 @@
             }
         }
 
-        // Player Bar Controls
         function togglePlay() {
             if (!ytPlayer) return;
             const state = ytPlayer.getPlayerState();
@@ -1673,10 +1619,10 @@
                 if (ytPlayer && ytPlayer.getCurrentTime && ytPlayer.getDuration) {
                     const current = ytPlayer.getCurrentTime() || 0;
                     const duration = ytPlayer.getDuration() || 0;
-                    
+
                     document.getElementById('currentTime').innerText = formatTime(current);
                     document.getElementById('duration').innerText = formatTime(duration);
-                    
+
                     if (duration > 0) {
                         document.getElementById('seekSlider').value = (current / duration) * 100;
                     }
@@ -1699,9 +1645,9 @@
             }, 3000);
         }
 
-        // ==========================================
-        // Render Backend Wake-up & Health-Check System
-        // ==========================================
+        // ════════════════════════════════════════════════════════════
+        //  Backend Wake-up & Health-Check System
+        // ════════════════════════════════════════════════════════════
         let wakeupTimer = null;
         let wakeupSeconds = 0;
         let isBackendLive = false;
@@ -1730,7 +1676,7 @@
             const controller = new AbortController();
             const timer = setTimeout(() => controller.abort(), timeoutMs);
             try {
-                const res = await fetch('/api/ping', { signal: controller.signal });
+                const res = await fetch(`${BACKEND_URL}/api/ping`, { signal: controller.signal });
                 clearTimeout(timer);
                 return res.ok;
             } catch (e) {
@@ -1930,7 +1876,6 @@
             document.getElementById('beatCombo').innerText = `x${beatCombo}`;
         }
     </script>
-    <!-- YouTube IFrame API -->
     <script src="https://www.youtube.com/iframe_api"></script>
 </body>
 </html>
