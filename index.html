@@ -853,12 +853,293 @@
                 grid-template-columns: 1fr;
             }
         }
+
+        /* Render Backend Wake-up Interactive Screen */
+        .wakeup-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(15, 17, 26, 0.96);
+            backdrop-filter: blur(12px);
+            z-index: 99999;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+            opacity: 0;
+            visibility: hidden;
+            transition: opacity 0.3s ease, visibility 0.3s ease;
+        }
+
+        .wakeup-overlay.active {
+            opacity: 1;
+            visibility: visible;
+        }
+
+        .wakeup-card {
+            background: #1a1d2d;
+            border: 1px solid #2a2e45;
+            border-radius: 20px;
+            max-width: 550px;
+            width: 100%;
+            padding: 25px;
+            box-shadow: 0 20px 50px rgba(0,0,0,0.6), 0 0 30px rgba(255, 51, 102, 0.2);
+            text-align: center;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .wakeup-header {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 10px;
+            margin-bottom: 20px;
+        }
+
+        .wakeup-badge {
+            background: rgba(255, 51, 102, 0.15);
+            color: #ff3366;
+            border: 1px solid rgba(255, 51, 102, 0.4);
+            padding: 6px 16px;
+            border-radius: 20px;
+            font-size: 0.82rem;
+            font-weight: 700;
+            letter-spacing: 0.5px;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .pulse-dot {
+            width: 8px;
+            height: 8px;
+            background-color: #ff3366;
+            border-radius: 50%;
+            animation: pulse-glow 1.5s infinite;
+        }
+
+        @keyframes pulse-glow {
+            0% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(255, 51, 102, 0.7); }
+            70% { transform: scale(1.2); box-shadow: 0 0 0 8px rgba(255, 51, 102, 0); }
+            100% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(255, 51, 102, 0); }
+        }
+
+        .wakeup-title {
+            font-size: 1.35rem;
+            font-weight: 700;
+            color: #ffffff;
+        }
+
+        .wakeup-sub {
+            font-size: 0.85rem;
+            color: #8e95b0;
+            line-height: 1.4;
+        }
+
+        .wakeup-timer-bar {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            background: #252a3f;
+            padding: 8px 15px;
+            border-radius: 10px;
+            font-size: 0.8rem;
+            color: #d1d5db;
+            margin-bottom: 20px;
+        }
+
+        .game-tabs {
+            display: flex;
+            gap: 8px;
+            margin-bottom: 15px;
+            justify-content: center;
+        }
+
+        .game-tab-btn {
+            background: #252a3f;
+            border: 1px solid #2a2e45;
+            color: #8e95b0;
+            padding: 6px 14px;
+            border-radius: 20px;
+            font-size: 0.8rem;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .game-tab-btn.active {
+            background: #ff3366;
+            color: white;
+            border-color: #ff3366;
+        }
+
+        .game-box {
+            background: #141724;
+            border: 1px solid #2a2e45;
+            border-radius: 14px;
+            padding: 18px;
+            min-height: 220px;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+        }
+
+        .quiz-question {
+            font-size: 0.95rem;
+            font-weight: 600;
+            color: #ffffff;
+            margin-bottom: 12px;
+        }
+
+        .quiz-options {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 8px;
+            margin-bottom: 12px;
+        }
+
+        .quiz-btn {
+            background: #23273c;
+            border: 1px solid #2a2e45;
+            color: #e5e7eb;
+            padding: 10px;
+            border-radius: 8px;
+            font-size: 0.82rem;
+            cursor: pointer;
+            transition: all 0.2s;
+            text-align: left;
+        }
+
+        .quiz-btn:hover {
+            background: #2d334e;
+            border-color: #ff3366;
+        }
+
+        .quiz-btn.correct {
+            background: #10b981 !important;
+            color: white !important;
+            border-color: #10b981 !important;
+        }
+
+        .quiz-btn.wrong {
+            background: #ef4444 !important;
+            color: white !important;
+            border-color: #ef4444 !important;
+        }
+
+        .quiz-stats {
+            display: flex;
+            justify-content: space-between;
+            font-size: 0.78rem;
+            color: #8e95b0;
+            border-top: 1px solid #2a2e45;
+            padding-top: 10px;
+        }
+
+        .beat-grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 10px;
+            margin: 15px 0;
+        }
+
+        .beat-pad {
+            aspect-ratio: 1;
+            background: #23273c;
+            border: 2px solid #2a2e45;
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.4rem;
+            color: #8e95b0;
+            cursor: pointer;
+            transition: transform 0.1s, background 0.2s, border-color 0.2s;
+            user-select: none;
+        }
+
+        .beat-pad:active, .beat-pad.hit {
+            transform: scale(0.92);
+        }
+
+        .beat-pad.active-pad {
+            background: #ff3366;
+            color: white;
+            border-color: #ff5e85;
+            box-shadow: 0 0 15px rgba(255, 51, 102, 0.6);
+        }
+
+        .close-wakeup-btn {
+            background: transparent;
+            border: none;
+            color: #8e95b0;
+            font-size: 0.78rem;
+            cursor: pointer;
+            margin-top: 12px;
+            text-decoration: underline;
+        }
+        .close-wakeup-btn:hover { color: white; }
     </style>
 </head>
 <body>
 
     <!-- Notification Toast -->
     <div id="toast" class="toast">Auto-playing recommended YouTube track!</div>
+
+    <!-- Render Server Wake-Up Interactive Overlay -->
+    <div id="wakeupOverlay" class="wakeup-overlay">
+        <div class="wakeup-card">
+            <div class="wakeup-header">
+                <div id="wakeupBadge" class="wakeup-badge">
+                    <span class="pulse-dot"></span> WAKING UP BACKEND SERVER
+                </div>
+                <h2 id="wakeupTitle" class="wakeup-title">☕ Server is Waking Up...</h2>
+                <p id="wakeupSub" class="wakeup-sub">Render free tier instances spin down after inactivity. Python backend server is starting up (~30s). Enjoy this mini-game while you wait!</p>
+            </div>
+
+            <div class="wakeup-timer-bar">
+                <span>⏱️ Time Elapsed: <strong id="wakeupTime">0s</strong></span>
+                <span>🔄 Status: <strong id="wakeupStatus">Pinging server...</strong></span>
+            </div>
+
+            <div class="game-tabs">
+                <button id="tabQuizBtn" class="game-tab-btn active" onclick="switchGameTab('quiz')">🎵 Music Trivia</button>
+                <button id="tabBeatBtn" class="game-tab-btn" onclick="switchGameTab('beat')">🥁 Beat Clicker</button>
+            </div>
+
+            <!-- Quiz Container -->
+            <div id="quizGameView" class="game-box">
+                <div>
+                    <div id="quizQuestion" class="quiz-question">Loading trivia question...</div>
+                    <div id="quizOptions" class="quiz-options"></div>
+                </div>
+                <div class="quiz-stats">
+                    <span>🏆 Score: <strong id="quizScore">0</strong></span>
+                    <span>🔥 Streak: <strong id="quizStreak">0</strong></span>
+                    <span id="quizFeedback" style="font-weight: 600;">Tap an answer!</span>
+                </div>
+            </div>
+
+            <!-- Beat Clicker Container -->
+            <div id="beatGameView" class="game-box" style="display: none;">
+                <p style="font-size: 0.85rem; color: #8e95b0; text-align: center;">Tap the glowing pad as fast as you can!</p>
+                <div class="beat-grid" id="beatGrid">
+                    <div class="beat-pad" onclick="tapBeatPad(0)">🎵</div>
+                    <div class="beat-pad" onclick="tapBeatPad(1)">🎶</div>
+                    <div class="beat-pad" onclick="tapBeatPad(2)">🎧</div>
+                    <div class="beat-pad" onclick="tapBeatPad(3)">🎸</div>
+                </div>
+                <div class="quiz-stats">
+                    <span>🥁 Beat Score: <strong id="beatScore">0</strong></span>
+                    <span>⚡ Combo: <strong id="beatCombo">x1</strong></span>
+                </div>
+            </div>
+
+            <button class="close-wakeup-btn" onclick="hideWakeupOverlay()">Continue browsing player UI</button>
+        </div>
+    </div>
 
     <!-- Header -->
     <header>
@@ -1006,8 +1287,8 @@
             isPlayerReady = true;
             startProgressLoop();
             
-            // Load initial trending results quietly without auto-scrolling
-            searchYouTube('best hindi drive songs', false);
+            // Check backend health & wake up if Render container is sleeping
+            initBackendHealthCheck();
         }
 
         function onPlayerStateChange(event) {
@@ -1072,22 +1353,33 @@
                 </div>
             `;
 
-            // Auto-scroll to results so user IMMEDIATELY sees that search is executing and results are loading!
             if (autoScroll) {
                 scrollToSection('resultsSection');
             }
             
+            const controller = new AbortController();
+            const timeoutId = setTimeout(() => controller.abort(), 10000); // 10s timeout
+
             try {
-                const response = await fetch(`/api/search?q=${encodeURIComponent(query)}`);
+                const response = await fetch(`/api/search?q=${encodeURIComponent(query)}`, { signal: controller.signal });
+                clearTimeout(timeoutId);
                 const results = await response.json();
+                isBackendLive = true;
                 heading.innerText = `🔍 Results for "${query}"`;
                 badge.innerText = `${results ? results.length : 0} items`;
                 renderResults(results);
             } catch (err) {
+                clearTimeout(timeoutId);
                 console.error("Search error:", err);
-                heading.innerText = `⚠️ Search failed`;
-                badge.innerText = 'Error';
-                grid.innerHTML = '<p style="color: var(--accent-color); text-align: center; grid-column: 1/-1; padding: 30px;">Failed to load search results. Please check server connection.</p>';
+                
+                // If backend is sleeping/waking up, show the interactive wake-up screen
+                if (!isBackendLive) {
+                    showWakeupOverlay(query);
+                } else {
+                    heading.innerText = `⚠️ Search failed`;
+                    badge.innerText = 'Error';
+                    grid.innerHTML = '<p style="color: var(--accent-color); text-align: center; grid-column: 1/-1; padding: 30px;">Failed to load results. Check your connection.</p>';
+                }
             }
         }
 
@@ -1403,6 +1695,237 @@
             setTimeout(() => {
                 toast.style.display = 'none';
             }, 3000);
+        }
+
+        // ==========================================
+        // Render Backend Wake-up & Health-Check System
+        // ==========================================
+        let wakeupTimer = null;
+        let wakeupSeconds = 0;
+        let isBackendLive = false;
+        let pendingSearchQuery = null;
+
+        const triviaQuestions = [
+            { q: "Which song was the first video on YouTube to hit 1 Billion views?", opts: ["Gangnam Style", "Despacito", "Baby", "See You Again"], ans: 0 },
+            { q: "What is the most-streamed song of all time on Spotify?", opts: ["Blinding Lights", "Shape of You", "Starboy", "Someone You Loved"], ans: 0 },
+            { q: "Which video held the YouTube view record before Despacito?", opts: ["See You Again", "Gangnam Style", "Baby Shark", "Uptown Funk"], ans: 0 },
+            { q: "Who performed the viral song 'Levitating'?", opts: ["Dua Lipa", "Ariana Grande", "Taylor Swift", "Billie Eilish"], ans: 0 },
+            { q: "What year was YouTube originally founded?", opts: ["2005", "2003", "2007", "2001"], ans: 0 },
+            { q: "Which artist holds the record for most Grammy wins of all time?", opts: ["Beyoncé", "Michael Jackson", "Stevie Wonder", "Kanye West"], ans: 0 },
+            { q: "What is the primary instrument of legendary musician Jimi Hendrix?", opts: ["Guitar", "Drums", "Piano", "Saxophone"], ans: 0 }
+        ];
+
+        let quizIndex = 0;
+        let quizScore = 0;
+        let quizStreak = 0;
+
+        let beatScore = 0;
+        let beatCombo = 1;
+        let activePadIndex = -1;
+        let beatTimer = null;
+
+        async function checkBackendPing(timeoutMs = 3000) {
+            const controller = new AbortController();
+            const timer = setTimeout(() => controller.abort(), timeoutMs);
+            try {
+                const res = await fetch('/api/ping', { signal: controller.signal });
+                clearTimeout(timer);
+                return res.ok;
+            } catch (e) {
+                return false;
+            }
+        }
+
+        async function initBackendHealthCheck() {
+            const live = await checkBackendPing(2500);
+            if (live) {
+                isBackendLive = true;
+                searchYouTube('best hindi drive songs', false);
+            } else {
+                isBackendLive = false;
+                showWakeupOverlay('best hindi drive songs');
+            }
+        }
+
+        function showWakeupOverlay(onReadyQuery = null) {
+            if (onReadyQuery) pendingSearchQuery = onReadyQuery;
+            const overlay = document.getElementById('wakeupOverlay');
+            if (!overlay) return;
+            overlay.classList.add('active');
+
+            wakeupSeconds = 0;
+            document.getElementById('wakeupTime').innerText = '0s';
+            document.getElementById('wakeupStatus').innerText = 'Pinging server...';
+
+            initQuizGame();
+            startBeatGameLoop();
+
+            if (!wakeupTimer) {
+                wakeupTimer = setInterval(async () => {
+                    wakeupSeconds += 1;
+                    document.getElementById('wakeupTime').innerText = `${wakeupSeconds}s`;
+
+                    if (wakeupSeconds % 2 === 0) {
+                        document.getElementById('wakeupStatus').innerText = `Pinging server (attempt #${Math.floor(wakeupSeconds/2)})...`;
+                        const isUp = await checkBackendPing(2000);
+                        if (isUp) {
+                            onBackendWokeUp();
+                        }
+                    }
+                }, 1000);
+            }
+        }
+
+        function onBackendWokeUp() {
+            if (wakeupTimer) {
+                clearInterval(wakeupTimer);
+                wakeupTimer = null;
+            }
+            if (beatTimer) {
+                clearInterval(beatTimer);
+            }
+            isBackendLive = true;
+
+            const badge = document.getElementById('wakeupBadge');
+            if (badge) {
+                badge.style.background = 'rgba(16, 185, 129, 0.2)';
+                badge.style.color = '#10b981';
+                badge.style.borderColor = '#10b981';
+                badge.innerHTML = '<i class="fa-solid fa-check"></i> BACKEND ONLINE';
+            }
+
+            const title = document.getElementById('wakeupTitle');
+            if (title) title.innerText = '🚀 Backend Ready!';
+
+            const sub = document.getElementById('wakeupSub');
+            if (sub) sub.innerText = 'Python server is live. Loading YouTube Music Player...';
+
+            const status = document.getElementById('wakeupStatus');
+            if (status) status.innerText = 'Connected!';
+
+            setTimeout(() => {
+                hideWakeupOverlay();
+                if (pendingSearchQuery) {
+                    const q = pendingSearchQuery;
+                    pendingSearchQuery = null;
+                    searchYouTube(q, true);
+                }
+            }, 1200);
+        }
+
+        function hideWakeupOverlay() {
+            const overlay = document.getElementById('wakeupOverlay');
+            if (overlay) overlay.classList.remove('active');
+            if (wakeupTimer) {
+                clearInterval(wakeupTimer);
+                wakeupTimer = null;
+            }
+            if (beatTimer) {
+                clearInterval(beatTimer);
+            }
+        }
+
+        function initQuizGame() {
+            quizIndex = Math.floor(Math.random() * triviaQuestions.length);
+            renderQuizQuestion();
+        }
+
+        function renderQuizQuestion() {
+            const item = triviaQuestions[quizIndex];
+            const qElem = document.getElementById('quizQuestion');
+            const container = document.getElementById('quizOptions');
+            const feedback = document.getElementById('quizFeedback');
+            if (!qElem || !container) return;
+
+            qElem.innerText = item.q;
+            container.innerHTML = '';
+            if (feedback) {
+                feedback.innerText = 'Tap an answer!';
+                feedback.style.color = '#8e95b0';
+            }
+
+            item.opts.forEach((opt, idx) => {
+                const btn = document.createElement('button');
+                btn.className = 'quiz-btn';
+                btn.innerText = opt;
+                btn.onclick = () => handleQuizAnswer(idx, item.ans, btn);
+                container.appendChild(btn);
+            });
+        }
+
+        function handleQuizAnswer(selected, correct, btn) {
+            const allBtns = document.querySelectorAll('.quiz-btn');
+            allBtns.forEach(b => b.disabled = true);
+
+            const feedback = document.getElementById('quizFeedback');
+            if (selected === correct) {
+                btn.classList.add('correct');
+                quizScore += 10;
+                quizStreak += 1;
+                if (feedback) {
+                    feedback.innerText = '✨ Correct! +10 pts';
+                    feedback.style.color = '#10b981';
+                }
+            } else {
+                btn.classList.add('wrong');
+                if (allBtns[correct]) allBtns[correct].classList.add('correct');
+                quizStreak = 0;
+                if (feedback) {
+                    feedback.innerText = '❌ Oops! Next question coming...';
+                    feedback.style.color = '#ef4444';
+                }
+            }
+            document.getElementById('quizScore').innerText = quizScore;
+            document.getElementById('quizStreak').innerText = quizStreak;
+
+            setTimeout(() => {
+                quizIndex = (quizIndex + 1) % triviaQuestions.length;
+                renderQuizQuestion();
+            }, 1300);
+        }
+
+        function switchGameTab(tab) {
+            const tabQuiz = document.getElementById('tabQuizBtn');
+            const tabBeat = document.getElementById('tabBeatBtn');
+            if (tabQuiz) tabQuiz.classList.toggle('active', tab === 'quiz');
+            if (tabBeat) tabBeat.classList.toggle('active', tab === 'beat');
+
+            const viewQuiz = document.getElementById('quizGameView');
+            const viewBeat = document.getElementById('beatGameView');
+            if (viewQuiz) viewQuiz.style.display = tab === 'quiz' ? 'flex' : 'none';
+            if (viewBeat) viewBeat.style.display = tab === 'beat' ? 'flex' : 'none';
+        }
+
+        function startBeatGameLoop() {
+            if (beatTimer) clearInterval(beatTimer);
+            beatTimer = setInterval(() => {
+                highlightRandomBeatPad();
+            }, 800);
+        }
+
+        function highlightRandomBeatPad() {
+            const pads = document.querySelectorAll('.beat-pad');
+            pads.forEach(p => p.classList.remove('active-pad'));
+            activePadIndex = Math.floor(Math.random() * pads.length);
+            if (pads[activePadIndex]) {
+                pads[activePadIndex].classList.add('active-pad');
+            }
+        }
+
+        function tapBeatPad(index) {
+            const pads = document.querySelectorAll('.beat-pad');
+            if (index === activePadIndex) {
+                beatScore += 5 * beatCombo;
+                beatCombo += 1;
+                pads[index].classList.remove('active-pad');
+                pads[index].classList.add('hit');
+                setTimeout(() => pads[index].classList.remove('hit'), 150);
+                activePadIndex = -1;
+            } else {
+                beatCombo = 1;
+            }
+            document.getElementById('beatScore').innerText = beatScore;
+            document.getElementById('beatCombo').innerText = `x${beatCombo}`;
         }
     </script>
     <!-- YouTube IFrame API -->

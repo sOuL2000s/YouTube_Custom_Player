@@ -17,7 +17,9 @@ class CustomHandler(http.server.SimpleHTTPRequestHandler):
         path = parsed_url.path
         query_params = urllib.parse.parse_qs(parsed_url.query)
 
-        if path == '/api/search':
+        if path == '/api/ping' or path == '/api/health':
+            self.send_json_response({'status': 'ok', 'message': 'server is active'})
+        elif path == '/api/search':
             self.handle_search(query_params)
         elif path == '/api/related':
             self.handle_related(query_params)
