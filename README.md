@@ -62,6 +62,7 @@ A sleek, modern, and lightweight YouTube Music Player web application built with
 
 ```text
 YouTube_Custom_Player/
+├── favicon.svg     # Website SVG favicon icon
 ├── index.html      # The main frontend application
 ├── server.py       # Python backend & API handler
 └── README.md       # Project documentation
