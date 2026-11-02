@@ -1,5 +1,9 @@
 # 🎵 YouTube Custom Player & Queue
 
+[![Live Demo](https://img.shields.io/badge/Live%20Demo-Render-brightgreen?style=for-the-badge&logo=render)](https://youtube-custom-player.onrender.com/)
+
+🔗 **Live Website:** [https://youtube-custom-player.onrender.com/](https://youtube-custom-player.onrender.com/)
+
 A sleek, modern, and lightweight YouTube Music Player web application built with a Python backend and a responsive HTML5/CSS3/JS frontend. This player allows you to search for songs, manage a playback queue, and enjoy a custom-themed interface without the clutter of the standard YouTube site.
 
 ## ✨ Features
