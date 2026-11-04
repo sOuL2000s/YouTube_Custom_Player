@@ -166,6 +166,18 @@
             border-color: var(--accent-color);
         }
 
+        .search-hint {
+            font-size: 0.72rem;
+            color: var(--text-muted);
+            padding: 0 5px;
+        }
+        .search-hint code {
+            background: #252a3f;
+            padding: 1px 5px;
+            border-radius: 4px;
+            color: var(--accent-color);
+        }
+
         .mobile-nav-tabs {
             display: none;
             background: #141724;
@@ -1041,6 +1053,75 @@
             text-decoration: underline;
         }
         .close-wakeup-btn:hover { color: white; }
+
+        /* ═══════════════════════════════════════════════════════════
+           PLAYLIST CARD
+           ═══════════════════════════════════════════════════════════ */
+        .playlist-card {
+            grid-column: 1 / -1;
+            display: flex;
+            gap: 18px;
+            align-items: center;
+            background: linear-gradient(135deg, #2a1330 0%, #1a1d2d 100%);
+            border: 1px solid rgba(255, 51, 102, 0.5);
+            border-radius: 14px;
+            padding: 16px;
+            box-shadow: 0 8px 24px rgba(255, 51, 102, 0.15);
+        }
+        .playlist-card .pl-thumb {
+            width: 110px;
+            height: 110px;
+            border-radius: 10px;
+            object-fit: cover;
+            flex-shrink: 0;
+            border: 2px solid rgba(255, 51, 102, 0.6);
+            background: #141724;
+        }
+        .playlist-card .pl-info {
+            flex: 1;
+            min-width: 0;
+        }
+        .playlist-card .pl-badge {
+            display: inline-block;
+            background: rgba(255, 51, 102, 0.2);
+            color: var(--accent-color);
+            font-size: 0.72rem;
+            font-weight: 700;
+            padding: 3px 10px;
+            border-radius: 12px;
+            letter-spacing: 0.4px;
+            margin-bottom: 8px;
+        }
+        .playlist-card .pl-title {
+            font-size: 1.1rem;
+            font-weight: 700;
+            color: #fff;
+            margin-bottom: 4px;
+            display: -webkit-box;
+            -webkit-line-clamp: 2;
+            -webkit-box-orient: vertical;
+            overflow: hidden;
+        }
+        .playlist-card .pl-meta {
+            font-size: 0.82rem;
+            color: var(--text-muted);
+            margin-bottom: 12px;
+        }
+        .playlist-card .pl-actions {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+        .playlist-card .pl-actions .btn {
+            flex: 0 0 auto;
+            padding: 8px 16px;
+        }
+        @media (max-width: 650px) {
+            .playlist-card { flex-direction: column; text-align: center; }
+            .playlist-card .pl-thumb { width: 90px; height: 90px; }
+            .playlist-card .pl-actions { width: 100%; }
+            .playlist-card .pl-actions .btn { flex: 1; }
+        }
     </style>
 </head>
 <body>
@@ -1107,7 +1188,7 @@
             </div>
             <form class="search-box" onsubmit="event.preventDefault(); triggerSearch();">
                 <i class="fa-solid fa-magnifying-glass search-icon" onclick="triggerSearch()" title="Click to search"></i>
-                <input type="text" id="searchInput" placeholder="Search YouTube songs, artists..." onkeyup="checkInputState(event)" onkeypress="handleSearchKey(event)">
+                <input type="text" id="searchInput" placeholder="Search YouTube songs, artists, or paste a playlist URL..." onkeyup="checkInputState(event)" onkeypress="handleSearchKey(event)">
                 <button type="button" class="clear-btn" id="clearBtn" onclick="clearSearchInput()"><i class="fa-solid fa-xmark"></i></button>
                 <button type="submit" class="search-submit-btn" title="Search"><i class="fa-solid fa-arrow-right"></i></button>
             </form>
@@ -1120,6 +1201,11 @@
             <span class="chip" onclick="quickSearch('🚗 Bollywood Drive Songs')"><i class="fa-solid fa-car"></i> Roadtrip</span>
             <span class="chip" onclick="quickSearch('🌟 90s Romantic Songs')"><i class="fa-solid fa-heart"></i> 90s Hits</span>
             <span class="chip" onclick="quickSearch('🎧 Acoustic Unplugged')"><i class="fa-solid fa-guitar"></i> Acoustic</span>
+        </div>
+
+        <!-- Playlist hint -->
+        <div class="search-hint">
+            💡 Tip: Paste a YouTube <strong>playlist URL</strong> (e.g. <code>youtube.com/playlist?list=…</code>) to load the whole playlist.
         </div>
     </header>
 
@@ -1208,9 +1294,11 @@
 
     <script>
         // ════════════════════════════════════════════════════════════
-        //  BACKEND CONFIG — replace this with your Render Web Service URL
+        //  BACKEND CONFIG — Auto-detect local vs deployed Render backend
         // ════════════════════════════════════════════════════════════
-        const BACKEND_URL = 'https://youtube-player-backend.onrender.com';
+        const BACKEND_URL = (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1' || window.location.hostname === '')
+            ? (window.location.origin.startsWith('http') ? window.location.origin : 'http://localhost:8000')
+            : 'https://youtube-player-backend.onrender.com';
         // ════════════════════════════════════════════════════════════
 
         let ytPlayer;
@@ -1278,10 +1366,25 @@
             }
         }
 
+        // ════════════════════════════════════════════════════════════
+        //  PLAYLIST DETECTION HELPERS
+        // ════════════════════════════════════════════════════════════
+        const PLAYLIST_REGEX = /[?&]list=([A-Za-z0-9_-]+)/i;
+
+        function isPlaylistUrl(str) {
+            if (!str) return false;
+            return PLAYLIST_REGEX.test(str) && (str.includes('youtube.com') || str.includes('youtu.be'));
+        }
+
         function triggerSearch() {
             const val = document.getElementById('searchInput').value.trim();
             if (!val) return;
-            searchYouTube(val, true);
+
+            if (isPlaylistUrl(val)) {
+                loadPlaylist(val);
+            } else {
+                searchYouTube(val, true);
+            }
         }
 
         function quickSearch(query) {
@@ -1292,6 +1395,12 @@
 
         async function searchYouTube(query, autoScroll = true) {
             if (!query) return;
+
+            // Route playlist URLs to the playlist loader
+            if (isPlaylistUrl(query)) {
+                loadPlaylist(query);
+                return;
+            }
 
             const heading = document.getElementById('resultsHeading');
             const badge = document.getElementById('resultsBadge');
@@ -1319,6 +1428,14 @@
                 clearTimeout(timeoutId);
                 const results = await response.json();
                 isBackendLive = true;
+
+                if (results && !Array.isArray(results) && results.tracks) {
+                    heading.innerText = `📀 Playlist loaded`;
+                    badge.innerText = `${results.count} tracks`;
+                    renderPlaylist(results);
+                    return;
+                }
+
                 heading.innerText = `🔍 Results for "${query}"`;
                 badge.innerText = `${results ? results.length : 0} items`;
                 renderResults(results);
@@ -1336,6 +1453,166 @@
             }
         }
 
+        // ════════════════════════════════════════════════════════════
+        //  PLAYLIST LOADING & RENDERING
+        // ════════════════════════════════════════════════════════════
+        async function loadPlaylist(url) {
+            const grid = document.getElementById('resultsGrid');
+            const heading = document.getElementById('resultsHeading');
+            const badge = document.getElementById('resultsBadge');
+
+            heading.innerHTML = `<i class="fa-solid fa-spinner fa-spin" style="color: var(--accent-color)"></i> Loading playlist...`;
+            badge.innerText = 'Playlist';
+            grid.innerHTML = `
+                <div class="loading-state">
+                    <i class="fa-solid fa-compact-disc fa-spin"></i>
+                    <p>Extracting playlist tracks (this can take 10–30s for large playlists)...</p>
+                </div>`;
+            scrollToSection('resultsSection');
+
+            const controller = new AbortController();
+            const timeoutId = setTimeout(() => controller.abort(), 45000); // playlists need longer
+
+            try {
+                const res = await fetch(`${BACKEND_URL}/api/playlist?url=${encodeURIComponent(url)}`, {
+                    signal: controller.signal
+                });
+                clearTimeout(timeoutId);
+
+                if (!res.ok) throw new Error('Playlist fetch failed');
+                const data = await res.json();
+
+                if (data.error) throw new Error(data.error);
+
+                isBackendLive = true;
+                heading.innerText = `📀 Playlist loaded`;
+                badge.innerText = `${data.count} tracks`;
+                renderPlaylist(data);
+
+            } catch (err) {
+                clearTimeout(timeoutId);
+                console.error('Playlist error:', err);
+
+                if (!isBackendLive) {
+                    // Backend was cold — show wake-up overlay, retry after wake
+                    pendingSearchQuery = url;
+                    showWakeupOverlay(url);
+                    return;
+                }
+
+                heading.innerText = '⚠️ Playlist failed';
+                badge.innerText = 'Error';
+                grid.innerHTML = `<p style="color: var(--accent-color); grid-column:1/-1; text-align:center; padding:30px;">
+                    Could not load playlist. Make sure it's public and try again.
+                </p>`;
+            }
+        }
+
+        function renderPlaylist(data) {
+            const grid = document.getElementById('resultsGrid');
+            grid.innerHTML = '';
+
+            const card = document.createElement('div');
+            card.className = 'playlist-card';
+
+            const thumb = document.createElement('img');
+            thumb.className = 'pl-thumb';
+            thumb.src = data.thumbnail || 'https://via.placeholder.com/110?text=Playlist';
+            thumb.alt = 'playlist cover';
+
+            const info = document.createElement('div');
+            info.className = 'pl-info';
+
+            const badge = document.createElement('span');
+            badge.className = 'pl-badge';
+            badge.innerText = `▶ PLAYLIST • ${data.count} TRACKS${data.truncated ? ' (truncated)' : ''}`;
+
+            const title = document.createElement('div');
+            title.className = 'pl-title';
+            title.textContent = data.title;
+
+            const meta = document.createElement('div');
+            meta.className = 'pl-meta';
+            meta.textContent = `by ${data.uploader}`;
+
+            const actions = document.createElement('div');
+            actions.className = 'pl-actions';
+
+            const playBtn = document.createElement('button');
+            playBtn.className = 'btn btn-primary';
+            playBtn.innerHTML = `<i class="fa-solid fa-play"></i> Play All (${data.count})`;
+            playBtn.onclick = () => playEntirePlaylist(data);
+
+            const queueBtn = document.createElement('button');
+            queueBtn.className = 'btn btn-secondary';
+            queueBtn.innerHTML = `<i class="fa-solid fa-plus"></i> Add All to Queue`;
+            queueBtn.onclick = () => queueEntirePlaylist(data);
+
+            const showBtn = document.createElement('button');
+            showBtn.className = 'btn btn-secondary';
+            showBtn.innerHTML = `<i class="fa-solid fa-list"></i> Show Tracks`;
+            showBtn.onclick = () => renderPlaylistTracks(data);
+
+            actions.append(playBtn, queueBtn, showBtn);
+            info.append(badge, title, meta, actions);
+            card.append(thumb, info);
+            grid.appendChild(card);
+
+            // Auto-render the track list underneath
+            renderPlaylistTracks(data);
+        }
+
+        function renderPlaylistTracks(data) {
+            const grid = document.getElementById('resultsGrid');
+            // Remove any previously rendered track cards (keep the playlist header card)
+            grid.querySelectorAll('.song-card').forEach(el => el.remove());
+
+            data.tracks.forEach(item => {
+                const card = document.createElement('div');
+                card.className = 'song-card';
+
+                card.innerHTML = `
+                    <div class="song-thumb-wrapper">
+                        <img class="song-thumb" src="${item.thumbnail}" alt="thumb">
+                    </div>
+                    <div class="song-title-text">${escapeHtml(item.title)}</div>
+                    <div class="song-uploader">${escapeHtml(item.uploader)}</div>
+                    <div class="card-actions">
+                        <button class="btn btn-primary play-btn"><i class="fa-solid fa-play"></i> Play</button>
+                        <button class="btn btn-secondary queue-btn"><i class="fa-solid fa-plus"></i> Queue</button>
+                    </div>`;
+
+                card.querySelector('.play-btn').onclick = () => {
+                    playNow(item.id, item.title, item.uploader, item.thumbnail);
+                    showToast(`Playing "${item.title.substring(0, 25)}..."`);
+                };
+                card.querySelector('.queue-btn').onclick = () =>
+                    addToQueue(item.id, item.title, item.uploader, item.thumbnail);
+
+                grid.appendChild(card);
+            });
+        }
+
+        function playEntirePlaylist(data) {
+            if (!data.tracks.length) return;
+            // Replace queue with the playlist (minus the first track, which starts immediately)
+            const [first, ...rest] = data.tracks;
+            queue = rest.map(t => ({ ...t }));
+            renderQueue();
+
+            playNow(first.id, first.title, first.uploader, first.thumbnail);
+            showToast(`▶ Playing playlist "${data.title}" (${data.count} tracks)`);
+        }
+
+        function queueEntirePlaylist(data) {
+            data.tracks.forEach(t => queue.push({ ...t }));
+            renderQueue();
+            showToast(`➕ Added ${data.count} tracks from "${data.title}" to queue`);
+        }
+
+        // ════════════════════════════════════════════════════════════
+        //  RESULT RENDERING (songs)
+        // ════════════════════════════════════════════════════════════
         function renderResults(results) {
             const grid = document.getElementById('resultsGrid');
             grid.innerHTML = '';
@@ -1407,6 +1684,9 @@
             }
         }
 
+        // ════════════════════════════════════════════════════════════
+        //  PLAYBACK CONTROLS
+        // ════════════════════════════════════════════════════════════
         function playNow(id, title, uploader, thumbnail) {
             currentVideo = { id, title, uploader, thumbnail };
             history.push(currentVideo);
@@ -1537,7 +1817,7 @@
 
                 try {
                     const currentUploader = currentVideo ? (currentVideo.uploader || currentVideo.author || '') : '';
-const response = await fetch(`${BACKEND_URL}/api/related?title=${encodeURIComponent(currentTitle)}&id=${encodeURIComponent(currentId)}&uploader=${encodeURIComponent(currentUploader)}`);
+                    const response = await fetch(`${BACKEND_URL}/api/related?title=${encodeURIComponent(currentTitle)}&id=${encodeURIComponent(currentId)}&uploader=${encodeURIComponent(currentUploader)}`);
                     const recs = await response.json();
                     if (recs && recs.length > 0) {
                         const rec = recs[Math.floor(Math.random() * recs.length)];
@@ -1757,7 +2037,12 @@ const response = await fetch(`${BACKEND_URL}/api/related?title=${encodeURICompon
                 if (pendingSearchQuery) {
                     const q = pendingSearchQuery;
                     pendingSearchQuery = null;
-                    searchYouTube(q, true);
+                    // Route appropriately: playlist URLs go to loadPlaylist
+                    if (isPlaylistUrl(q)) {
+                        loadPlaylist(q);
+                    } else {
+                        searchYouTube(q, true);
+                    }
                 }
             }, 1200);
         }

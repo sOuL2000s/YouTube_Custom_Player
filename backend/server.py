@@ -3,10 +3,12 @@ import socketserver
 import urllib.parse
 import json
 import os
+import re
 import yt_dlp
 
 PORT = int(os.environ.get("PORT", 8000))
 DIRECTORY = os.path.dirname(os.path.abspath(__file__))
+FRONTEND_DIR = os.path.abspath(os.path.join(DIRECTORY, '..', 'frontend'))
 
 # Keywords that indicate a "same-song variant" rather than a genuinely different song.
 VERSION_KEYWORDS = [
@@ -14,6 +16,9 @@ VERSION_KEYWORDS = [
     '8d', 'nightcore', 'extended', 'edit', 'live', 'acoustic version',
     'sped up', 'speed up', 'lofi version', 'reprise', 'mashup',
 ]
+
+# Matches list= anywhere in the URL
+PLAYLIST_PATTERN = re.compile(r'[?&]list=([A-Za-z0-9_-]+)', re.IGNORECASE)
 
 
 def is_version_like(title):
@@ -24,9 +29,18 @@ def is_version_like(title):
     return any(kw in t for kw in VERSION_KEYWORDS)
 
 
+def extract_playlist_id(url):
+    """Return the playlist ID if the URL is a playlist URL, else None."""
+    if not url:
+        return None
+    m = PLAYLIST_PATTERN.search(url)
+    return m.group(1) if m else None
+
+
 class CustomHandler(http.server.SimpleHTTPRequestHandler):
     def __init__(self, *args, **kwargs):
-        super().__init__(*args, directory=DIRECTORY, **kwargs)
+        static_dir = FRONTEND_DIR if os.path.exists(FRONTEND_DIR) else DIRECTORY
+        super().__init__(*args, directory=static_dir, **kwargs)
 
     def do_GET(self):
         parsed_url = urllib.parse.urlparse(self.path)
@@ -39,14 +53,10 @@ class CustomHandler(http.server.SimpleHTTPRequestHandler):
             self.handle_search(query_params)
         elif path == '/api/related':
             self.handle_related(query_params)
-        elif path == '/':
-            self.send_json_response({
-                'status': 'ok',
-                'service': 'youtube-custom-player-backend',
-                'endpoints': ['/api/ping', '/api/search?q=...', '/api/related?title=...&id=...']
-            })
+        elif path == '/api/playlist':
+            self.handle_playlist(query_params)
         else:
-            self.send_json_response({'error': 'not found'}, status=404)
+            super().do_GET()
 
     def do_OPTIONS(self):
         self.send_response(204)
@@ -59,6 +69,11 @@ class CustomHandler(http.server.SimpleHTTPRequestHandler):
         q = params.get('q', [''])[0]
         if not q:
             self.send_json_response([])
+            return
+
+        # If user pasted a playlist URL, treat it as a playlist request
+        if extract_playlist_id(q):
+            self.handle_playlist(params)
             return
 
         ydl_opts = {
@@ -97,6 +112,62 @@ class CustomHandler(http.server.SimpleHTTPRequestHandler):
         except Exception as e:
             print(f"Search error: {e}")
             self.send_json_response([], status=200)
+
+    def handle_playlist(self, params):
+        """Extract all tracks from a YouTube playlist URL."""
+        url = params.get('url', [''])[0] or params.get('q', [''])[0]
+        playlist_id = extract_playlist_id(url)
+
+        if not playlist_id:
+            self.send_json_response({'error': 'Invalid playlist URL'}, status=400)
+            return
+
+        # Cap extraction so a 500-song playlist doesn't hang the request
+        MAX_TRACKS = 100
+
+        ydl_opts = {
+            'quiet': True,
+            'extract_flat': True,       # fast — no per-video API calls
+            'no_warnings': True,
+            'playlistend': MAX_TRACKS,
+        }
+
+        try:
+            with yt_dlp.YoutubeDL(ydl_opts) as ydl:
+                playlist_url = f"https://www.youtube.com/playlist?list={playlist_id}"
+                res = ydl.extract_info(playlist_url, download=False)
+
+                playlist_title = res.get('title') or 'YouTube Playlist'
+                playlist_uploader = res.get('uploader') or res.get('channel') or 'YouTube'
+                entries = res.get('entries') or []
+
+                tracks = []
+                for entry in entries:
+                    if not entry:
+                        continue
+                    v_id = entry.get('id')
+                    if not v_id:
+                        continue
+                    tracks.append({
+                        'id': v_id,
+                        'title': entry.get('title') or 'Unknown Title',
+                        'uploader': entry.get('uploader') or entry.get('channel') or playlist_uploader,
+                        'duration': entry.get('duration'),
+                        'thumbnail': f"https://i.ytimg.com/vi/{v_id}/hqdefault.jpg",
+                    })
+
+                self.send_json_response({
+                    'playlist_id': playlist_id,
+                    'title': playlist_title,
+                    'uploader': playlist_uploader,
+                    'count': len(tracks),
+                    'truncated': len(entries) >= MAX_TRACKS,
+                    'thumbnail': tracks[0]['thumbnail'] if tracks else '',
+                    'tracks': tracks,
+                })
+        except Exception as e:
+            print(f"Playlist error: {e}")
+            self.send_json_response({'error': str(e)}, status=500)
 
     def handle_related(self, params):
         title = params.get('title', [''])[0]
